@@ -13,23 +13,31 @@ Reply in JSON with this exact shape, and nothing else:
 
  Example - 
  Topic: Space
- {question: "Which planet has the most moons?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: "Jupiter", funFact: "Jupiter's moon Ganymede is larger than Mercury."}
+ {"question": "Which planet has the most moons?", "options": ["Earth", "Mars", "Jupiter", "Venus"], "answer": "Jupiter", "funFact": "Jupiter's moon Ganymede is larger than Mercury."}
  `;
 
-router.post("/", async (req, res) => {
-  const { topic } = req.body;
+try{
 
-  const interaction = await ai.interactions.create({
-    model: MODEL,
-    input: `Topic: ${topic}`,
-    system_instruction: PROMPT,
-    generation_config: { temperature: 0.9 }
+  router.post("/", async (req, res) => {
+    const { topic } = req.body;
+    
+    const interaction = await ai.interactions.create({
+      model: MODEL,
+      input: `Topic: ${topic}`,
+      system_instruction: PROMPT,
+      generation_config: { temperature: 0.9 },
+      response_format: { type: "text", mime_type: "application/json" }
+    });
+    
+    console.log(interaction.output_text);
+    
+    const quiz = JSON.parse(interaction.output_text);
+    res.json(quiz);
   });
-
-  console.log(interaction.output_text);
-
-  const quiz = JSON.parse(interaction.output_text);
-  res.json(quiz);
-});
+}
+catch (error) {
+  console.error("Error in /question route:", error);
+  res.status(500).json({ error: "Could not generate a question" });
+}
 
 export default router;

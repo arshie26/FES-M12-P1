@@ -8,6 +8,7 @@ export default function App() {
   const [question, setQuestion] = useState(null);
   const [picked, setPicked] = useState(null);
   const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -41,14 +42,17 @@ export default function App() {
 
   function pick(option) {
     setPicked(option);
-    if (option === question.answer) setScore((s) => s + 1);
+    const nextScore = option === question.answer ? score + 1 : 0;
+    setScore(nextScore);
+    setBestScore((best) => Math.max(best, nextScore));
   }
 
   return (
     <main className="app">
-      <header>
+      <header className="app-header">
         <h1>AI Trivia</h1>
         <span className="score">Score: {score}</span>
+        <span className="score">Best Score: {bestScore}</span>
       </header>
 
       <form onSubmit={askTopic} className="topic-form">
@@ -63,7 +67,9 @@ export default function App() {
       <PhotoRound onSubmit={askPhoto} loading={loading} />
 
       {error && <p className="error">{error}</p>}
-      {question && <QuestionCard data={question} picked={picked} onPick={pick} />}
+      {question && (
+        <QuestionCard data={question} picked={picked} onPick={pick} />
+      )}
     </main>
   );
 }
